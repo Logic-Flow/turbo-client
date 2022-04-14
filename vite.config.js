@@ -8,6 +8,7 @@ export default function ({ command, mode }) {
   const root = process.cwd();
   const env = loadEnv(mode, root);
   return defineConfig({
+    base: './',
     server: {
       host: true,
       port: 9095,
