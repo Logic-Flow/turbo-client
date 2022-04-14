@@ -24,13 +24,12 @@ export default {
     }
   },
   async mounted() {
-    let flowModuleId = window.sessionStorage.getItem('flowModelId')
+    let flowModuleId = this.$route.params.flowModelId
     if (!flowModuleId) {
       flowModuleId = await this.createFlow()
     }
     this.flowModuleId = flowModuleId;
     await this.queryFlow()
-    console.log(this.flowModuleId)
     this.lf = new LogicFlow({
       container: this.$refs.container,
       grid: {
@@ -104,7 +103,6 @@ export default {
         }).then(({ data, errCode }) => {
           if (errCode === 1000) {
             const { flowModuleId } = data;
-            window.sessionStorage.setItem('flowModelId', flowModuleId);
             resolve(flowModuleId);
           }
         })

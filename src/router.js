@@ -3,7 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 
 const routes = [
   { path: '/', component:  () => import('./components/List.vue'), },
-  { path: '/flow', component:  () => import('./components/FlowChart.vue'), },
+  { path: '/flow/:flowModelId', component:  () => import('./components/FlowChart.vue'), },
 ]
 
 export const router = createRouter({

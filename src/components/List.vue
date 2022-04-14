@@ -1,55 +1,92 @@
 <template>
   <div class="flow-container">
     <div class="flow-buttons">
-      <el-input v-model="flowName"></el-input>
-      <el-button type="primary" size="small">新建流程</el-button>
+      <el-input v-model="flowName" class="flow-search" placeholder="输入流程流程"></el-input>
+      <el-button type="primary" class="search-flow" @click="$_queryFlowList">搜索流程</el-button>
+      <el-button type="primary" class="create-flow" @click="$_openCreateFlow">新建流程</el-button>
     </div>
     <div class="flow-list">
-      <el-table :data="tableData" style="width: 100%">
-        <el-table-column fixed prop="date" label="Date" width="150" />
-        <el-table-column prop="name" label="Name" width="120" />
-        <el-table-column prop="state" label="State" width="120" />
-        <el-table-column prop="city" label="City" width="120" />
-        <el-table-column prop="address" label="Address" width="600" />
-        <el-table-column prop="zip" label="Zip" width="120" />
-        <el-table-column fixed="right" label="Operations" width="120">
-          <template #default>
-            <el-button type="text" size="small" @click="handleClick"
-              >Detail</el-button
-            >
-            <el-button type="text" size="small">Edit</el-button>
+      <el-table :data="tableData" style="width: 100%" v-loading="loading">
+        <el-table-column prop="flowName" label="流程名称" />
+        <el-table-column prop="flowKey" label="flowKey" />
+        <el-table-column prop="tenant" label="tenant" />
+        <el-table-column label="修改时间">
+          <template #default="scope">
+            {{ moment(scope.row.modifyTime).format("YYYY/MM/DD hh:mm:ss")  }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="operator" label="修改人" />
+        <el-table-column label="操作" width="120">
+          <template #default="scope">
+            <el-button type="text" size="small" @click="$_goDetail(scope.row.flowModuleId)">查看流程</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
+    <el-dialog
+      v-model="dialogVisible"
+      title="新建流程"
+      width="30%"
+    >
+        <el-form
+          :label-position="right"
+          label-width="100px"
+          :model="formInfo"
+          style="max-width: 460px"
+        >
+          <el-form-item label="流程名称" prop="flowName">
+            <el-input v-model="formInfo.flowName" />
+          </el-form-item>
+          <el-form-item label="flowKey" prop="flowKey">
+            <el-input v-model="formInfo.flowKey" />
+          </el-form-item>
+          <el-form-item label="创建人" prop="operator">
+            <el-input v-model="formInfo.operator" />
+          </el-form-item>
+          <el-form-item label="租户标识" prop="tenant">
+            <el-input v-model="formInfo.tenant" />
+          </el-form-item>
+        </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="$_createFlow">新建</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
-import { queryFlowList } from '../service/flow'
+import moment from 'moment'
+import { queryFlowList, createFlow } from '../service/flow'
+const CALLER = 'TEST_CALLER'
 
 export default {
   setup() {
     const tableData = ref([
-      // {
-      //   date: '2016-05-03',
-      //   name: 'Tom',
-      //   state: 'California',
-      //   city: 'Los Angeles',
-      //   address: 'No. 189, Grove St, Los Angeles',
-      //   zip: 'CA 90036',
-      //   tag: 'Home',
-      // },
     ])
     const currentPage = ref(1)
     const pageSize = ref(10)
     const flowName = ref('')
+    const loading = ref(false)
+    const dialogVisible = ref(false)
+    const formInfo = ref({
+      flowName: '',
+      operator: '',
+      tenant: '',
+      flowKey: ''
+    })
     return {
       tableData,
       currentPage,
       pageSize,
-      flowName
+      flowName,
+      moment,
+      loading,
+      dialogVisible,
+      formInfo
     }
   },
   mounted () {
@@ -57,11 +94,47 @@ export default {
   },
   methods: {
     $_queryFlowList() {
+      this.loading = true
       queryFlowList({
         current: this.currentPage,
-        size: this.pageSize
-      }).then((res) => {
-        console.log(res)
+        size: this.pageSize,
+        flowName: this.flowName
+      }).then(({ data }) => {
+        const { flowModuleList, total } = data;
+        this.tableData = flowModuleList
+        this.loading = false
+      }).catch(e => {
+        this.loading = false
+      })
+    },
+    $_goDetail(item) {
+      this.$router.push({
+        path: `/flow/${item}`
+      })
+    },
+    $_openCreateFlow () {
+      this.dialogVisible = true
+    },
+    $_createFlow() {
+      createFlow({
+        caller: CALLER,
+        flowName: this.formInfo.flowName,
+        flowKey: this.formInfo.flowKey,
+        operator: this.formInfo.operator,
+        tenant: this.formInfo.tenant,
+      }).then(({ data, errCode }) => {
+        if (errCode === 1000) {
+          const { flowModuleId } = data;
+          this.$_goDetail (flowModuleId)
+        } else {
+          throw new Error(data)
+        }
+      }).catch(e => {
+        ElMessage({
+          showClose: true,
+          message: '新建流程失败',
+          type: 'error',
+        })
       })
     }
   }
@@ -75,8 +148,16 @@ export default {
 }
 .flow-buttons {
   margin: 10px 0;
+  display: flex;
+}
+.flow-search {
+  width: 300px;
 }
 .flow-list {
   border: 1px solid #9a9a9c;
 }
+.create-flow {
+  margin-left: 525px;
+}
+
 </style>

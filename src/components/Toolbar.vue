@@ -1,6 +1,6 @@
 <template>
   <div class="tool-bar">
-    <div class="flow-name" v-if="flowKey">{{flowName}} ({{flowKey}})</div>
+    <div class="flow-name">{{flowName}} <span v-if="flowKey">({{flowKey}})</span></div>
     <div class="tool-icons">
       <el-tooltip
         class="toolbar-tooltip"
