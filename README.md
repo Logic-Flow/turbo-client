@@ -4,4 +4,8 @@
 
  ## 使用方式
 
- 将
+ 在本地启动turbo项目后，将`.env.development`中的`VITE_SERVER_ADDR`地址改成后端服务地址。
+
+ ## 演示
+
+ 

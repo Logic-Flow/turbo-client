@@ -6,7 +6,13 @@ const TurboType = {
   // SERVICE_TASK = 5, 暂不支持
   EXCLUSIVE_GATEWAY: 6,
 }
-
+const TurboTypeMap = {
+  1: 'bpmn:sequenceFlow',
+  2: 'bpmn:startEvent',
+  3: 'bpmn:endEvent',
+  4: 'bpmn:userTask',
+  6: 'bpmn:exclusiveGateway',
+}
 // 转换Turbo识别的类型
 function getTurboType(type) {
   switch (type) {
@@ -48,7 +54,6 @@ function convertNodeToTurboElement(node) {
       x,
       y,
       text,
-      logicFlowType: type,
     },
     key: id,
   };
@@ -76,10 +81,9 @@ function convertEdgeToTurboElement(edge) {
       ...properties,
       name: (text && text.value) || '',
       text,
-      startPoint,
-      endPoint,
-      pointsList,
-      logicFlowType: type,
+      startPoint: JSON.stringify(startPoint),
+      endPoint: JSON.stringify(endPoint),
+      pointsList: JSON.stringify(text),
     },
     key: id,
   };
@@ -110,28 +114,34 @@ export function toTurboData(data) {
 // 将Turbo元素数据转换为LogicFlow中的Edge数据
 function convertFlowElementToEdge(element) {
   const {
-    incoming, outgoing, properties, key,
+    incoming, outgoing, properties, key, type,
   } = element;
   const {
     text,
+    name,
     startPoint,
     endPoint,
     pointsList,
-    logicFlowType,
   } = properties;
   const edge = {
     id: key,
-    type: logicFlowType,
+    type: TurboTypeMap[type],
     sourceNodeId: incoming[0],
     targetNodeId: outgoing[0],
-    text,
-    startPoint,
-    endPoint,
-    pointsList,
+    text: text || name,
     properties: {},
   };
+  if (startPoint) {
+    edge.startPoint = JSON.parse(startPoint)
+  }
+  if (endPoint) {
+    edge.endPoint = JSON.parse(endPoint)
+  }
+  if (pointsList) {
+    edge.endPoint = JSON.parse(pointsList)
+  }
   // 这种转换方式，在自定义属性中不能与excludeProperties中的属性重名，否则将在转换过程中丢失
-  const excludeProperties = ['startPoint', 'endPoint', 'pointsList', 'text', 'logicFlowType'];
+  const excludeProperties = ['startPoint', 'endPoint', 'pointsList', 'text'];
   Object.keys(element.properties).forEach(property => {
     if (excludeProperties.indexOf(property) === -1) {
       edge.properties[property] = element.properties[property];
@@ -142,20 +152,25 @@ function convertFlowElementToEdge(element) {
 
 // 将Turbo元素数据转换为LogicFlow中的Node数据
 function convertFlowElementToNode(element) {
-  const { properties, key } = element;
-  const {
-    x, y, text, logicFlowType,
+  const { properties, key, type, bounds } = element;
+  let {
+    x, y, text,
   } = properties;
+  if (x === undefined) {
+    const [{ x: x1, y: y1 }, { x: x2, y: y2 }] = bounds;
+    x = (x1 + x2) / 2
+    y = (y1 + y2) / 2
+  }
   const node = {
     id: key,
-    type: logicFlowType,
+    type: TurboTypeMap[type],
     x,
     y,
     text,
     properties: {},
   };
   // 这种转换方式，在自定义属性中不能与excludeProperties中的属性重名，否则将在转换过程中丢失
-  const excludeProperties = ['x', 'y', 'text', 'logicFlowType'];
+  const excludeProperties = ['x', 'y', 'text'];
   Object.keys(element.properties).forEach(property => {
     if (excludeProperties.indexOf(property) === -1) {
       node.properties[property] = element.properties[property];
@@ -183,26 +198,22 @@ export function toLogicflowData(data) {
   return lfData;
 }
 
-const TurboAdapter = {
-  pluginName: 'turboAdapter',
-  install(lf) {
+class TurboAdapter {
+  static pluginName =  'turboAdapter'
+  constructor({ lf }) {
     lf.adapterIn = this.adapterIn;
     lf.adapterOut = this.adapterOut;
-  },
-  shapeConfigMap: new Map(),
-  setCustomShape(key, val) {
-    this.shapeConfigMap.set(key, val);
-  },
+  }
   adapterOut(logicflowData) {
     if (logicflowData) {
       return toTurboData(logicflowData);
     }
-  },
+  }
   adapterIn(turboData) {
     if (turboData) {
       return toLogicflowData(turboData);
     }
-  },
+  }
 };
 
 export default TurboAdapter;
