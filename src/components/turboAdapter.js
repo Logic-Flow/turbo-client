@@ -211,7 +211,9 @@ class TurboAdapter {
   }
   adapterIn(turboData) {
     if (turboData) {
-      return toLogicflowData(turboData);
+      let d = toLogicflowData(turboData);
+      console.log(d);
+      return d;
     }
   }
 };

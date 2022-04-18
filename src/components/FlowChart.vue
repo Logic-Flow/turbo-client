@@ -17,10 +17,18 @@ export default {
     const count = ref(0)
     const flowName = ref('流程')
     const flowKey = ref('')
+    const activeData = ref(null)
+    const openDrawer = ref(false)
+    const drawType = ref('')
+    const graphData = ref('')
     return {
       count,
       flowKey,
-      flowName
+      flowName,
+      activeData,
+      openDrawer,
+      drawType,
+      graphData
     }
   },
   async mounted() {
@@ -91,6 +99,11 @@ export default {
       }
     ]);
     this.lf.render(this.flowModel || {})
+    this.lf.on('edge:click', ({ data }) => {
+      this.activeData = data
+      this.drawType = 'edgeCondition'
+      this.openDrawer = true
+    })
   },
   methods: {
     async createFlow () {
@@ -117,7 +130,6 @@ export default {
         }).then(({ data, errCode }) => {
           if (errCode === 1000) {
             const { flowModel, flowName, flowKey } = data;
-            console.log(data);
             if (flowModel) {
               this.flowModel = JSON.parse(flowModel)
             } else {
@@ -127,7 +139,6 @@ export default {
             this.flowKey = flowKey
             resolve()
           }
-          console.log(data)
         }).catch(e => {
           console.log(333, e)
         })
@@ -153,13 +164,26 @@ export default {
         caller: "testCaller",
         flowModuleId: this.flowModuleId,
         tenant: "testTenant",
-      }).then((res) => {
-        ElMessage({
-          showClose: true,
-          message: '发布成功',
-          type: 'success',
-        })
+      }).then(({ errMsg }) => {
+        if (errMsg) {
+          ElMessage({
+            showClose: true,
+            message: errMsg,
+            type: 'error',
+          })
+        } else {
+          ElMessage({
+            showClose: true,
+            message: '发布成功',
+            type: 'success',
+          })
+        }
       })
+    },
+    $_getData () {
+      this.openDrawer = true
+      this.drawType = 'graphData'
+      this.graphData = JSON.stringify(this.lf.getGraphData())
     }
   },
   components: {
@@ -174,11 +198,35 @@ export default {
       class="node-red-toolbar"
       @saveFlow="$_saveFlow"
       @publishFlow="$_publishFlow"
+      @getData="$_getData"
       :flowName="flowName"
       :flowKey="flowKey"
     >
     </toolbar>
     <div ref="container" class="container"></div>
+    <el-drawer
+      v-model="openDrawer"
+      title="查看"
+    >
+      <div v-if="drawType === 'edgeCondition'">
+        <span>判断条件</span>
+        <el-input
+          v-model="activeData.properties.conditionsequenceflow"
+          :rows="2"
+          type="textarea"
+          placeholder="请输入条件判断表达式"
+        />
+      </div>
+      <div v-if="drawType === 'graphData'">
+        <span>流程图数据</span>
+        <el-input
+          v-model="graphData"
+          :rows="20"
+          type="textarea"
+          placeholder="请输入条件判断表达式"
+        />
+      </div>
+    </el-drawer>
   </div>
 </template>
 

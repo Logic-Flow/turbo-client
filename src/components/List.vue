@@ -10,9 +10,14 @@
         <el-table-column prop="flowName" label="流程名称" />
         <el-table-column prop="flowKey" label="flowKey" />
         <el-table-column prop="tenant" label="tenant" />
+        <el-table-column label="流程状态">
+          <template #default="scope">
+            {{ getStatus(scope.row.status)  }}
+          </template>
+        </el-table-column>
         <el-table-column label="修改时间">
           <template #default="scope">
-            {{ moment(scope.row.modifyTime).format("YYYY/MM/DD hh:mm:ss")  }}
+            {{ moment(scope.row.modifyTime).format("YYYY/MM/DD HH:mm:ss")  }}
           </template>
         </el-table-column>
         <el-table-column prop="operator" label="修改人" />
@@ -22,6 +27,12 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        layout="prev, pager, next"
+        :total="1000"
+        v-model:current-page="currentPage"
+        @current-change="$_queryFlowList"
+      />
     </div>
     <el-dialog
       v-model="dialogVisible"
@@ -70,6 +81,7 @@ export default {
     const currentPage = ref(1)
     const pageSize = ref(10)
     const flowName = ref('')
+    const total = ref(0)
     const loading = ref(false)
     const dialogVisible = ref(false)
     const formInfo = ref({
@@ -78,6 +90,16 @@ export default {
       tenant: '',
       flowKey: ''
     })
+    const statusMap = {
+      0: '默认',
+      1: '草稿',
+      2: '编辑中',
+      3: '已下线',
+      4: '已发布'
+    }
+    const getStatus = (status) => {
+      return statusMap[status]
+    }
     return {
       tableData,
       currentPage,
@@ -85,7 +107,9 @@ export default {
       flowName,
       moment,
       loading,
+      getStatus,
       dialogVisible,
+      total,
       formInfo
     }
   },
@@ -103,6 +127,7 @@ export default {
         const { flowModuleList, total } = data;
         this.tableData = flowModuleList
         this.loading = false
+        this.total = total
       }).catch(e => {
         this.loading = false
       })

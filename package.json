@@ -8,8 +8,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@logicflow/core": "^1.1.7",
-    "@logicflow/extension": "^1.1.11",
+    "@logicflow/core": "^1.1.13",
+    "@logicflow/extension": "^1.1.13",
     "axios": "^0.26.1",
     "element-plus": "^2.0.4",
     "moment": "^2.29.2",
