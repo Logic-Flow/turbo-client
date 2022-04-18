@@ -164,8 +164,8 @@ export default {
         caller: "testCaller",
         flowModuleId: this.flowModuleId,
         tenant: "testTenant",
-      }).then(({ errMsg }) => {
-        if (errMsg) {
+      }).then(({ errMsg, errCode }) => {
+        if (errCode !== 1000) {
           ElMessage({
             showClose: true,
             message: errMsg,
