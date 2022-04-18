@@ -8,9 +8,9 @@
 
  ## 演示效果
 
-[1](https://cdn.jsdelivr.net/gh/Logic-Flow/static@latest/turbo/1.png)
+![1](https://cdn.jsdelivr.net/gh/Logic-Flow/static@latest/turbo/1.png)
 
-[2](https://cdn.jsdelivr.net/gh/Logic-Flow/static@latest/turbo/2.png)
+![2](https://cdn.jsdelivr.net/gh/Logic-Flow/static@latest/turbo/2.png)
 
 ## turboAdapter
 
