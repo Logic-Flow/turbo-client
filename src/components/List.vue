@@ -29,7 +29,7 @@
       </el-table>
       <el-pagination
         layout="prev, pager, next"
-        :total="1000"
+        :total="total"
         v-model:current-page="currentPage"
         @current-change="$_queryFlowList"
       />
