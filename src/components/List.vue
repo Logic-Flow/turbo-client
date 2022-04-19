@@ -7,9 +7,9 @@
     </div>
     <div class="flow-list">
       <el-table :data="tableData" style="width: 100%" v-loading="loading">
+        <el-table-column prop="flowModuleId" label="flowModuleId" />
         <el-table-column prop="flowName" label="流程名称" />
         <el-table-column prop="flowKey" label="flowKey" />
-        <el-table-column prop="tenant" label="tenant" />
         <el-table-column label="流程状态">
           <template #default="scope">
             {{ getStatus(scope.row.status)  }}
@@ -20,7 +20,7 @@
             {{ moment(scope.row.modifyTime).format("YYYY/MM/DD HH:mm:ss")  }}
           </template>
         </el-table-column>
-        <el-table-column prop="operator" label="修改人" />
+        <el-table-column prop="operator" label="修改人" width="120" />
         <el-table-column label="操作" width="120">
           <template #default="scope">
             <el-button type="text" size="small" @click="$_goDetail(scope.row.flowModuleId)">查看流程</el-button>
@@ -54,9 +54,9 @@
           <el-form-item label="创建人" prop="operator">
             <el-input v-model="formInfo.operator" />
           </el-form-item>
-          <el-form-item label="租户标识" prop="tenant">
+          <!-- <el-form-item label="租户标识" prop="tenant">
             <el-input v-model="formInfo.tenant" />
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -146,7 +146,7 @@ export default {
         flowName: this.formInfo.flowName,
         flowKey: this.formInfo.flowKey,
         operator: this.formInfo.operator,
-        tenant: this.formInfo.tenant,
+        tenant: 'TEST_TENANT',
       }).then(({ data, errCode }) => {
         if (errCode === 1000) {
           const { flowModuleId } = data;

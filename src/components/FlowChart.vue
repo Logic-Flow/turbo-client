@@ -184,6 +184,10 @@ export default {
       this.openDrawer = true
       this.drawType = 'graphData'
       this.graphData = JSON.stringify(this.lf.getGraphData())
+    },
+    $_saveCondition () {
+      this.lf.setProperties(this.activeData.id, this.activeData.properties)
+      this.openDrawer = false
     }
   },
   components: {
@@ -216,6 +220,7 @@ export default {
           type="textarea"
           placeholder="请输入条件判断表达式"
         />
+        <el-button @click="$_saveCondition">确认</el-button>
       </div>
       <div v-if="drawType === 'graphData'">
         <span>流程图数据</span>
