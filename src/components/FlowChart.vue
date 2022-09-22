@@ -99,7 +99,7 @@ export default {
       }
     ]);
     this.lf.render(this.flowModel || {})
-    this.lf.on('edge:click', ({ data }) => {
+    this.lf.on('edge:dbclick', ({ data }) => {
       this.activeData = data
       this.drawType = 'edgeCondition'
       this.openDrawer = true
@@ -220,6 +220,8 @@ export default {
           type="textarea"
           placeholder="请输入条件判断表达式"
         />
+        <div>名称</div>
+        <el-input v-model="activeData.text"></el-input>
         <el-button @click="$_saveCondition">确认</el-button>
       </div>
       <div v-if="drawType === 'graphData'">

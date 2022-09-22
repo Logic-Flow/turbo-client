@@ -83,7 +83,7 @@ function convertEdgeToTurboElement(edge) {
       text,
       startPoint: JSON.stringify(startPoint),
       endPoint: JSON.stringify(endPoint),
-      pointsList: JSON.stringify(text),
+      pointsList: JSON.stringify(pointsList),
     },
     key: id,
   };
@@ -138,7 +138,7 @@ function convertFlowElementToEdge(element) {
     edge.endPoint = JSON.parse(endPoint)
   }
   if (pointsList) {
-    edge.endPoint = JSON.parse(pointsList)
+    edge.pointsList = JSON.parse(pointsList)
   }
   // 这种转换方式，在自定义属性中不能与excludeProperties中的属性重名，否则将在转换过程中丢失
   const excludeProperties = ['startPoint', 'endPoint', 'pointsList', 'text'];
@@ -212,7 +212,6 @@ class TurboAdapter {
   adapterIn(turboData) {
     if (turboData) {
       let d = toLogicflowData(turboData);
-      console.log(d);
       return d;
     }
   }
